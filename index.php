@@ -33,18 +33,15 @@
      {
          global $vowels;
          $count = count($string_array);
-         $nnp = '';
+         $last_vowel = '';
          for ($i =  $count-1; $i < $count && $i>-1; $i--) {
 
                 if(array_search($string_array[$i], $vowels))
                 {
-
-                    $nnp = negative_present_particle($string_array[$i]);
-
+                    $last_vowel = $string_array[$i];
                 }
-
          }
-         return $nnp;
+         return $last_vowel;
 
      }
 function negative_present_particle($last_letter): string
@@ -67,6 +64,102 @@ function negative_present_particle($last_letter): string
     return $negative_present_particle;
 }
 
+function past_affix_d($last_letter): string
+{
+
+    $past_affix = '';
+
+    if($last_letter == 'e' || $last_letter ==  'i') {
+        $past_affix = 'di';
+    }
+    elseif ($last_letter == 'a' || $last_letter == 'ı'){
+        $past_affix = 'dı';
+    }
+    elseif ($last_letter == 'o' || $last_letter == 'u'){
+        $past_affix = 'du';
+    }
+    elseif ($last_letter == 'ü' || $last_letter == 'ö'){
+        $past_affix = 'dü';
+    }
+    return $past_affix;
+}
+function past_affix_t($last_letter): string
+{
+
+    $past_affix = '';
+
+    if($last_letter == 'e' || $last_letter ==  'i') {
+        $past_affix = 'ti';
+    }
+    elseif ($last_letter == 'a' || $last_letter == 'ı'){
+        $past_affix = 'tı';
+    }
+    elseif ($last_letter == 'o' || $last_letter == 'u'){
+        $past_affix = 'tu';
+    }
+    elseif ($last_letter == 'ü' || $last_letter == 'ö'){
+        $past_affix = 'tü';
+    }
+    return $past_affix;
+}
+    function past_private_ending_niz($last_letter): string
+    {   //определяет личное окончание в прошедшем кат времен
+        $ending = '';
+        if($last_letter == 'di' || $last_letter ==  'ti') {
+            $ending = 'niz';
+        }
+        elseif ($last_letter == 'dı' || $last_letter == 'tı'){
+            $ending = 'nız';
+        }
+        elseif ($last_letter == 'du' || $last_letter == 'tu'){
+            $ending = 'nuz';
+        }
+        elseif ($last_letter == 'dü' || $last_letter == 'tü'){
+            $ending = 'nüz';
+        }
+        return $ending;
+
+
+     }
+function past_private_ending_lar($last_letter): string
+{   //определяет личное окончание в прошедшем кат времен
+    $ending = '';
+    if($last_letter == 'di' || $last_letter ==  'ti') {
+        $ending = 'ler';
+    }
+    elseif ($last_letter == 'dı' || $last_letter == 'tı'){
+        $ending = 'lar';
+    }
+    elseif ($last_letter == 'du' || $last_letter == 'tu'){
+        $ending = 'lar';
+    }
+    elseif ($last_letter == 'dü' || $last_letter == 'tü'){
+        $ending = 'ler';
+    }
+    return $ending;
+
+
+}
+
+function negative_past_particle($affix): string
+{
+         $npp = '';
+    if($affix == 'dı' || $affix ==  'tı') {
+        $npp = 'mı';
+    }
+    elseif ($affix == 'di' || $affix == 'ti'){
+        $npp = 'mi';
+    }
+    elseif ($affix == 'du' || $affix == 'tu'){
+        $npp = 'mu';
+    }
+    elseif ($affix == 'dü' || $affix == 'tü'){
+        $npp = 'mü';
+    }
+    return $npp;
+
+}
+
     function negative_present_particle2($root): string
     {
         global $consonants, $vowels;
@@ -78,15 +171,51 @@ function negative_present_particle($last_letter): string
             return negative_present_particle($last_letter);
 
         } else {
+            $last_vowel_letter = search_last_vowel($string_array);
 
-           return search_last_vowel($string_array);
+            return negative_present_particle($last_vowel_letter);
+
         }
-
-
 
     }
     $npp =   negative_present_particle2($root);
+
+    function select_past_affix($root): string
+    {
+        $affix = '';
+        global $Tonsuz, $vowels;
+        $string_array = mb_str_split($root);
+        $last_letter = $string_array[iconv_strlen($root)-1]; // последняя буква в основе
+        if(array_search($last_letter, $Tonsuz)) {
+              $last_vowel =  search_last_vowel($string_array);
+              $affix =  past_affix_t($last_vowel);
+              echo $root.$affix;
+        }
+        else
+        {
+            if(array_search($last_letter, $vowels))
+            {
+               $affix =  past_affix_d($last_letter);
+
+            }
+            else {
+                $last_vowel =  search_last_vowel($string_array);
+                $affix =  past_affix_d($last_vowel);
+            }
+
+        }
+        //echo $affix;
+
+        return $affix;
+
+
+    }
+    $affix = select_past_affix($root);
+    $npp = negative_past_particle($affix);
+    $siz_end = past_private_ending_niz($affix);
+    $lar_end = past_private_ending_lar($affix);
 ?>
+
 
 
 
@@ -116,16 +245,16 @@ function negative_present_particle($last_letter): string
         <table>
             <tbody>
             <tr>
-                <td>ben<code> <?php echo $word; ?> <strong>muyum?</strong></code></td>
-                <td>biz <code><?php echo $word; ?> <strong>muyuz?</strong></code></td>
+                <td>Ben<code> <?php echo $word; ?> <strong>muyum?</strong></code></td>
+                <td>Biz <code><?php echo $word; ?> <strong>muyuz?</strong></code></td>
             </tr>
             <tr>
-                <td>sen <code><?php echo $word; ?> <strong>musun?</strong></code></td>
-                <td>siz <code><?php echo $word; ?> <strong>musunuz?</strong></code></td>
+                <td>Sen <code><?php echo $word; ?> <strong>musun?</strong></code></td>
+                <td>Siz <code><?php echo $word; ?> <strong>musunuz?</strong></code></td>
             </tr>
             <tr>
-                <td>o <code><?php echo $word; ?> <strong>mu?</strong></code></td>
-                <td>onlar <code><?php echo $word; ?>lar <strong>mı?</strong></code></td>
+                <td>O <code><?php echo $word; ?> <strong>mu?</strong></code></td>
+                <td>Onlar <code><?php echo $word; ?>lar <strong>mı?</strong></code></td>
             </tr>
             </tbody>
         </table>
@@ -135,16 +264,16 @@ function negative_present_particle($last_letter): string
         <table>
             <tbody>
             <tr>
-                <td>ben <code><?php echo $root.$npp; ?>yorum</code></td>
-                <td>biz <code><?php echo $root.$npp; ?>yoruz</code></td>
+                <td>Ben <code><?php echo $root; ?><strong><?=$npp?></strong>yorum</code></td>
+                <td>Biz <code><?php echo $root; ?><strong><?=$npp?></strong>yoruz</code></td>
             </tr>
             <tr>
-                <td>sen <code><?php echo $root.$npp; ?>yorsun</code></td>
-                <td>siz <code><?php echo $root.$npp; ?>yorsunuz</code></td>
+                <td>Sen <code><?php echo $root; ?><strong><?=$npp?></strong>yorsun</code></td>
+                <td>Siz <code><?php echo $root; ?><strong><?=$npp?></strong>yorsunuz</code></td>
             </tr>
             <tr>
-                <td>o <code><?php echo $root.$npp; ?>yor</code></td>
-                <td>onlar <code><?php echo $root.$npp; ?>yorlar</code></td>
+                <td>O <code><?php echo $root; ?><strong><?=$npp?></strong>yor</code></td>
+                <td>Onlar <code><?php echo $root; ?><strong><?=$npp?></strong>yorlar</code></td>
             </tr>
             </tbody>
         </table>
@@ -154,20 +283,43 @@ function negative_present_particle($last_letter): string
     <table>
         <tbody>
         <tr>
-            <td>Ben <code><?php echo $root.$npp; ?>yor muyum?</code></td>
-            <td>Biz <code><?php echo $root.$npp; ?>yor muyuz?</code></td>
+            <td>Ben <code><?php echo $root.$npp; ?>yor <strong>muyum</strong>?</code></td>
+            <td>Biz <code><?php echo $root.$npp; ?>yor <strong>muyuz</strong>?</code></td>
         </tr>
         <tr>
-            <td>Sen <code><?php echo $root.$npp; ?>yor musun?</code></td>
-            <td>Siz <code><?php echo $root.$npp; ?>yor musunuz?</code></td>
+            <td>Sen <code><?php echo $root.$npp; ?>yor <strong>musun</strong>?</code></td>
+            <td>Siz <code><?php echo $root.$npp; ?>yor <strong>musunuz</strong>?</code></td>
         </tr>
         <tr>
-            <td>O <code><?php echo $root.$npp; ?>yor mu?</code></td>
-            <td>Onlar <code><?php echo $root.$npp; ?>yorlar mı?</code></td>
+            <td>O <code><?php echo $root.$npp; ?>yor <strong>mu</strong>?</code></td>
+            <td>Onlar <code><?php echo $root.$npp; ?>yorlar <strong>mı</strong>?</code></td>
         </tr>
         </tbody>
     </table>
 </figure>
+<h2 class="wp-block-heading">Прошедшее категорическое время Belirli Geçmiş Zaman</h2>
+<h3 class="wp-block-heading">Утвердительная форма</h3>
+<figure class="wp-block-table">
+    <table>
+        <tbody>
+        <tr>
+            <td>Ben <code><?=$root?><strong><?=$affix?></strong>m</code></td>
+            <td>Biz <code><?=$root?><strong><?=$affix?></strong>k</code></td>
+        </tr>
+        <tr>
+            <td>Sen <code><?=$root?><strong><?=$affix?></strong>n</code></td>
+            <td>Siz <code><?=$root?><strong><?=$affix?></strong><?=$siz_end?></code></td>
+        </tr>
+        <tr>
+            <td>O <code><?=$root?><strong><?=$affix?></strong></code></td>
+            <td>Onlar <code><?=$root?><strong><?=$affix?></strong><?=$lar_end?></code></td>
+        </tr>
+        </tbody>
+    </table>
+</figure>
+<h3 class="wp-block-heading"><strong>Вопросительная форма</strong></h3>
+<h3 class="wp-block-heading"><strong>Отрицательная форма</strong></h3>
+<h3 class="wp-block-heading"><strong>Вопросительно-отрицательная форма</strong></h3>
 
 <?php
 
